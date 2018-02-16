@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Home page</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+    <h1>Login Successed</h1>
+    <div th:object="${user}">
+        <fieldset>
+            <label>User Name : </label><span th:text="*{name}"/>
+            <label>First Name : </label><span th:text="*{firstname}"/>
+            <label>Last Name : </label><span th:text="*{lastname}"/>
+            <label>Email : </label><span th:text="*{email}"/>
+        </fieldset>
+    </div>
+
+    <p>
+        <a href="#" th:href="@{/user/logout}">Logout</a>
+    </p>
+</body>
+</html>

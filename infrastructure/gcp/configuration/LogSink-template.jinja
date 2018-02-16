@@ -1,0 +1,7 @@
+resources:
+- type: logging.v2.sink
+  name: {{ env["name"] }}-ls
+  properties:
+    name: my-syslog-errors-to-pubsub
+    destination: storage.googleapis.com/rich-sunlight-188120.appspot.com
+    filter: resource.type=gce_instance

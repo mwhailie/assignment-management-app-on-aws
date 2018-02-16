@@ -1,0 +1,57 @@
+
+# Copyright 2016 Google Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+imports:
+- path: vm-template.jinja
+- path: network-template.jinja
+- path: firewall-template.jinja
+- path: compute-engine-template.jinja
+- path: cloudsql-instance-template.jinja
+- path: nosql-template.jinja
+- path: cloudsql-instance-template.jinja
+- path: pubsub-cloud-function.jinja
+- path: service-account.jinja
+- path: bucket.jinja
+- path: dns-template.jinja
+- path: dnsZone.py
+- path: dnsZone.py.schema
+- path: auto-scaledgroup-template.jinja
+- path: LogMetric-template.jinja
+
+resources:
+- name: compute-engine
+  type: compute-engine-template.jinja
+- name: function
+  type: pubsub-cloud-function.jinja
+  properties:
+     region: us-central1
+     entryPoint: handler
+     sourceArchiveUrl: gs://cloud-function-sample/function.zip
+- name: bucket
+  type: bucket.jinja
+- name: dns
+  type: dns-template.jinja
+- name: auto-scaledgroup
+  type: auto-scaledgroup-template.jinja
+  properties:
+    regions: 
+      - us-west1
+      - us-east1
+#- name: log-metric
+#  type: LogMetric-template.jinja
+
+outputs:
+- name: function-output
+  value: $(ref.function.cloud-function-response)

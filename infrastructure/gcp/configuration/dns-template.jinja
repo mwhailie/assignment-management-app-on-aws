@@ -1,0 +1,23 @@
+imports:
+- path: dnsZone.py
+
+resources:
+- name: csye6225-fall2017-mawenhe
+  type: dnsZone.py
+  properties:
+    dnsName: csye6225-fall2017-mawenhe.me.
+    description: My description.
+    resourceRecordSets:
+    - name: csye6225-fall2017-mawenhe.me.
+      type: TXT
+      ttl: 3600
+      rrdatas:
+      # Due to the way the RFC defines TXT records, you really want to surround
+      # them in double quotes when sent to the DNS API, otherwise they are split
+      # on whitespace into a series of strings.
+      - '"Set by DM."'
+    - name: csye6225-fall2017-mawenhe.me.
+      type: A
+      ttl: 3600
+      rrdatas:
+      - 1.2.3.4

@@ -1,0 +1,6 @@
+resources:
+- type: logging.v2.metric
+  name: {{ env["name"] }}-lm
+  properties:
+    name: error_count
+    filter: resource.type=gce_instance

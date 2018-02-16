@@ -1,0 +1,426 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Sample CloudFormation Template for CSYE 6225 - Fall 2017",
+    "Resources": {
+        "EC2Instance": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": "ami-cd0f5cb6",
+                "InstanceType": "t2.micro",
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "csye6225webapp",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "IamInstanceProfile": {"Ref" : "iamInstanceProfile"},
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash -ex\n",
+                                "export DEBIAN_FRONTEND=noninteractive\n",
+                                "sudo apt-get update && apt-get upgrade -y\n",
+                                "sudo apt-get -y install default-jre\n",
+                                "sudo apt-get -y install default-jdk\n",
+                                "sudo apt-get -y install mysql-client-core-5.7\n",
+                                "sudo apt-get -y install tomcat8\n",
+                                "sudo apt-get -y install ruby\n",
+                                "sudo apt-get install wget \n",
+                                "cd /home/ubuntu\n",
+                                "wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install\n",
+                                "chmod +x ./install\n",
+                                "sudo ./install auto\n",
+                                "sudo service codedeploy-agent stop\n",
+                                "sudo service codedeploy-agent start\n",
+                                "sudo service codedeploy-agent status\n",
+                                "\n"
+                            ]
+                        ]
+                    }
+                },
+                "KeyName": "id_rsa",
+                "SubnetId": {
+                    "Ref": "ParamSubnetID"
+                },
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeType": "gp2",
+                            "VolumeSize": "16"
+                        }
+                    }
+                ],
+                "Tags" : [{
+                    "Key" : "NAME",
+                    "Value" : "CSYE6225"
+                }],
+                "DisableApiTermination": false
+            }
+        },
+        "iamInstanceProfile" : {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+               "Roles": [{"Ref" : "roleCodeDeployEC2ServiceRole"} ],
+               "InstanceProfileName": "instanceProfile"
+            }
+         },
+        "iamPolicyCodeDeployEC2S3" : {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+                "Description" : "This policy allows EC2 instances to get data from S3 buckets. This is required for EC2 instances to download latest application revision.",
+                "PolicyDocument" : {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                                {
+                                    "Action": [
+                                    "s3:Get*",
+                                    "s3:List*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                        ]
+                    },
+                "ManagedPolicyName" : "CodeDeploy-EC2-S3-template"
+            }
+        },
+        "iamPolicyTravisUploadToS3" : {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+                "PolicyDocument" : {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "s3:PutObject"
+                                ],
+                                "Resource": [
+                                    "*"
+                                ]
+                            }
+                        ]
+                    },
+                
+                
+                "ManagedPolicyName" : "Travis-Upload-To-S3-template",
+                "Groups" : ["deployment"]
+            }
+        },
+        "iamPolicyTravisCodeDeploy" : {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+                "Description" :"This policy allows TravisCI to call CodeDeploy APIs to initiate application deployment on EC2 instances.",
+                "PolicyDocument" : {
+                                "Version": "2012-10-17",
+                                "Statement": [
+                                    {
+                                        "Effect": "Allow",
+                                        "Action": [
+                                            "codedeploy:RegisterApplicationRevision",
+                                            "codedeploy:GetApplicationRevision"
+                                        ],
+                                        "Resource": [
+                                                {
+                                                    "Fn::Join": [
+                                                        "",
+                                                        [
+                                                            "arn:aws:codedeploy:us-east-1:",
+                                                            { "Ref" : "AWS::AccountId" },
+                                                            ":application:application-cloudformation"
+                                                        ]
+                                                ]}
+                                            ]
+                                    },
+                                    {
+                                        "Effect": "Allow",
+                                        "Action": [
+                                            "codedeploy:CreateDeployment",
+                                            "codedeploy:GetDeployment"
+                                        ],
+                                        "Resource": [
+                                            "*"
+                                        ]
+                                    },
+                                    {
+                                        "Effect": "Allow",
+                                        "Action": [
+                                            "codedeploy:GetDeploymentConfig"
+                                        ],
+                                        "Resource": [
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        "arn:aws:codedeploy:us-east-1:",
+                                                        { "Ref" : "AWS::AccountId" },
+                                                        ":deploymentconfig:CodeDeployDefault.OneAtATime"
+                                                    ]
+                                            ]},
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        "arn:aws:codedeploy:us-east-1:",
+                                                        { "Ref" : "AWS::AccountId" },
+                                                        ":deploymentconfig:CodeDeployDefault.HalfAtATime"
+                                                    ]
+                                            ]},
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        "arn:aws:codedeploy:us-east-1:",
+                                                        { "Ref" : "AWS::AccountId" },
+                                                        ":deploymentconfig:CodeDeployDefault.AllAtOnce"
+                                                    ]
+                                            ]}
+                                        ]
+                                    }
+                                ]
+                            },
+                "ManagedPolicyName" : "Travis-Code-Deploy-template",
+                "Groups" : ["deployment"]
+            }
+        },
+        "roleCodeDeployEC2ServiceRole" : {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                    "AssumeRolePolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                                {
+                                    "Action": ["sts:AssumeRole"],
+                                    "Effect": "Allow",
+                                    "Principal": {
+                                            "Service": [ "ec2.amazonaws.com" ]
+                                    }
+                                }
+                        ]
+                    },
+                    "ManagedPolicyArns": [{"Ref": "iamPolicyCodeDeployEC2S3"}, {"Ref" : "iamPolicyTravisUploadToS3"}],
+                    "RoleName": "CodeDeployEC2ServiceRoleTemplate"
+            }
+        },
+        "iamCodeDeployServiceRole" : {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                        "AssumeRolePolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                    {
+		                            "Action": ["sts:AssumeRole"],
+		                            "Effect": "Allow",
+                                    "Principal": {
+                                            "Service": [ 
+                                                "codedeploy.amazonaws.com",
+                                                "ec2.amazonaws.com" 
+                                            ]
+                                        }
+                                    }
+                            ]
+                        },
+                        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole"],
+                        "RoleName": "iamCodeDeployServiceRoleTemplate"
+            }            
+        },
+        "csye6225webapp": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "security group for ec2",
+                "VpcId": {
+                    "Ref": "ParamVPCID"
+                },
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "80",
+                        "ToPort": "80",
+                        "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "443",
+                        "ToPort": "443",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
+        "csye6225rds": {
+            "Type": "AWS::RDS::DBSecurityGroup",
+            "Properties": {
+                "DBSecurityGroupIngress": {
+                    "EC2SecurityGroupId": {
+                        "Fn::GetAtt": [
+                            "csye6225webapp",
+                            "GroupId"
+                        ]
+                    }
+                },
+                "EC2VpcId": {
+                    "Ref": "ParamVPCID"
+                },
+                "GroupDescription": "security group for rds"
+            }
+        },
+        "DBSubnetGroup": {
+            "Type": "AWS::RDS::DBSubnetGroup",
+            "Properties": {
+                "DBSubnetGroupDescription": "DBSubnetGroup",
+                "SubnetIds": [
+                    {
+                        "Ref": "ParamSubnetID"
+                    },
+                    {
+                        "Ref": "ParamSubnetID2"
+                    }
+                ]
+            }
+        },
+        "RecordSetGroup": {
+            "Type": "AWS::Route53::RecordSetGroup",
+            "Properties": {
+                "Comment": "Update record to reflect new IP address",
+                "HostedZoneId": {
+                    "Ref": "ParamHostedZoneID"
+                },
+                "RecordSets": [
+                    {
+                        "Name": {
+                            "Ref": "ParamRecordSetsName"
+                        },
+                        "Type": "A",
+                        "TTL": "60",
+                        "ResourceRecords": [
+                            {
+                                "Fn::GetAtt": [
+                                    "EC2Instance",
+                                    "PublicIp"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "DynamoDBTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+                "AttributeDefinitions": [
+                    {
+                        "AttributeName": "id",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [
+                    {
+                        "AttributeName": "id",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "TableName": "csye6225-template",
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": "5",
+                    "WriteCapacityUnits": "5"
+                }
+            }
+        },
+        "RDSInstance": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "DBName": "csye6225",
+                "AllocatedStorage": "10",
+                "DBInstanceClass": "db.t2.medium",
+                "MultiAZ": false,
+                "Engine": "MySQL",
+                "EngineVersion": "5.6.35",
+                "MasterUsername": "csye6225master",
+                "MasterUserPassword": "csye6225password",
+                "StorageType": "gp2",
+                "DBSecurityGroups": [
+                    {
+                        "Ref": "csye6225rds"
+                    }
+                ],
+                "DBInstanceIdentifier": "csye6225-fall2017",
+                "PubliclyAccessible": false,
+                "DBSubnetGroupName": {
+                    "Ref": "DBSubnetGroup"
+                }
+            },
+            "DeletionPolicy": "Delete"
+        },
+        "codedeployApplication" : {
+            "Type" : "AWS::CodeDeploy::Application",
+            "Properties" : {
+              "ApplicationName" : "application-cloudformation"
+            }
+          },
+        "DeploymentGroup" : {
+            "Type" : "AWS::CodeDeploy::DeploymentGroup",
+            "DependsOn" : ["iamCodeDeployServiceRole"],
+            "Properties" : {
+              "ApplicationName" : "application-cloudformation",
+              "DeploymentGroupName" : "application-cloudformation",
+              "Ec2TagFilters" : [{
+                    "Key" : "NAME",
+                    "Type" : "KEY_AND_VALUE",
+                    "Value" : "CSYE6225"
+              }],
+              "DeploymentStyle" : {
+                      "DeploymentOption" : "WITHOUT_TRAFFIC_CONTROL"
+              },
+              "DeploymentConfigName" : "CodeDeployDefault.OneAtATime",
+              "ServiceRoleArn" : {"Fn::GetAtt" : ["iamCodeDeployServiceRole", "Arn"] }
+            }
+          },
+         "MySNSTopic" : {
+            "Type" : "AWS::SNS::Topic",
+            "Properties" : {
+                "Subscription" : [{ 
+                    "Endpoint" : "yan.hao@husky.neu.edu" ,
+	                "Protocol" : "email" },
+		            { 
+                    "Endpoint" : "jing.yu@husky.neu.edu" ,
+                    "Protocol" : "email" },
+		            { 
+                    "Endpoint" : "wang.shirui@husky.neu.edu" ,
+                    "Protocol" : "email" },
+		            { 
+                    "Endpoint" : "ma.wenhe@husky.neu.edu" ,
+                    "Protocol" : "email" }
+                ],
+                "TopicName" : "password_reset"
+            }
+         }
+    },
+    "Parameters": {
+        "ParamVPCID": {
+            "Type": "String"
+        },
+        "ParamSubnetID": {
+            "Type": "String"
+        },
+        "ParamSubnetID2": {
+            "Type": "String"
+        },
+        "ParamHostedZoneID": {
+            "Type": "String"
+        },
+        "ParamRecordSetsName": {
+            "Type": "String"
+        }
+    }
+}

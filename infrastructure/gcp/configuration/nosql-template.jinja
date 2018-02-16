@@ -1,0 +1,21 @@
+
+resources:
+- name: bigtable-instance
+  type: bigtableadmin.v2.instance
+  properties:
+    parent: projects/{{ env["project"] }}
+    instanceId: bigtable-template
+    instance: 
+      displayName: bigtable-template
+    clusters:
+      cluster1:
+        location: projects/{{ env["project"] }}/locations/us-east1-c
+        serveNodes: 3
+- name: bigtable-table
+  type: bigtableadmin.v2.instance.table
+  properties:
+    tableId: bigtable-template
+    parent: projects/{{ env["project"] }}/instances/bigtable-template
+  metadata:
+    dependsOn:
+      - bigtable-instance

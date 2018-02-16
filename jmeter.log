@@ -1,0 +1,23 @@
+2017-10-21 17:37:03,690 INFO o.a.j.u.JMeterUtils: Setting Locale to en_US
+2017-10-21 17:37:03,719 INFO o.a.j.JMeter: Loading user properties from: /home/mizuki/Development/apache-jmeter-3.3/bin/user.properties
+2017-10-21 17:37:03,721 INFO o.a.j.JMeter: Loading system properties from: /home/mizuki/Development/apache-jmeter-3.3/bin/system.properties
+2017-10-21 17:37:03,735 INFO o.a.j.JMeter: Copyright (c) 1998-2017 The Apache Software Foundation
+2017-10-21 17:37:03,735 INFO o.a.j.JMeter: Version 3.3 r1808647
+2017-10-21 17:37:03,735 INFO o.a.j.JMeter: java.version=1.8.0_144
+2017-10-21 17:37:03,736 INFO o.a.j.JMeter: java.vm.name=OpenJDK 64-Bit Server VM
+2017-10-21 17:37:03,736 INFO o.a.j.JMeter: os.name=Linux
+2017-10-21 17:37:03,736 INFO o.a.j.JMeter: os.arch=amd64
+2017-10-21 17:37:03,736 INFO o.a.j.JMeter: os.version=4.10.0-35-generic
+2017-10-21 17:37:03,736 INFO o.a.j.JMeter: file.encoding=UTF-8
+2017-10-21 17:37:03,744 INFO o.a.j.JMeter: Max memory     =1226506240
+2017-10-21 17:37:03,744 INFO o.a.j.JMeter: Available Processors =1
+2017-10-21 17:37:03,756 INFO o.a.j.JMeter: Default Locale=English (United States)
+2017-10-21 17:37:03,757 INFO o.a.j.JMeter: JMeter  Locale=English (United States)
+2017-10-21 17:37:03,758 INFO o.a.j.JMeter: JMeterHome=/home/mizuki/Development/apache-jmeter-3.3
+2017-10-21 17:37:03,758 INFO o.a.j.JMeter: user.dir  =/home/mizuki/Development/cloudcomputing/csye6225-fall2017-1
+2017-10-21 17:37:03,758 INFO o.a.j.JMeter: PWD       =/home/mizuki/Development/cloudcomputing/csye6225-fall2017-1
+2017-10-21 17:37:03,759 INFO o.a.j.JMeter: IP: 127.0.1.1 Name: mizuki-VirtualBox FullName: mizuki-VirtualBox
+2017-10-21 17:37:04,832 INFO o.a.j.g.a.LookAndFeelCommand: Using look and feel: javax.swing.plaf.metal.MetalLookAndFeel [Metal, CrossPlatform]
+2017-10-21 17:37:04,862 INFO o.a.j.JMeter: Loaded icon properties from org/apache/jmeter/images/icon.properties
+2017-10-21 17:37:05,865 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must contain the string: '.functions.'
+2017-10-21 17:37:05,867 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must not contain the string: '.gui.'

@@ -1,0 +1,74 @@
+info:
+  title: Cloud DNS
+  author: harwayne@
+  description: >
+    Simple prototype to control DNS from inside DM. Note that this provides no
+    atomicity, so probably shouldn't be used for any Production workload. Does
+    seem to work well for simple cases like 'point a DNS entry at the dev stack
+    I just brought up.'
+
+required:
+- dnsName
+- description
+- resourceRecordSets
+
+properties:
+  dnsName:
+    description: >
+      The dnsName parameter used in the ManagedZone. See
+      https://cloud.google.com/dns/api/v1/managedZones. 'The DNS name of this
+      managed zone, for instance "example.com.".'
+    type: string
+    # TODO: Find a good pattern. For now, just assert that it ends in a dot, as
+    # that is the most common mistake.
+    pattern: \.$
+  description:
+    description: >
+      The description of the managedZone. Oddly enough, this is required by the
+      Cloud DNS API.
+    type: string
+    pattern: ^.{0,1023}$
+  resourceRecordSets:
+    description: >
+      The ResourceRecordSets meant to be in the zone. See
+      https://cloud.google.com/dns/api/v1/resourceRecordSets.
+    type: array
+    object:
+      description: >
+        An individual ResourceRecordSet.
+      type: object
+      item:
+        required:
+        - name
+        - type
+        - ttl
+        - rrdatas
+        name:
+          description: >
+            Name of the DNS record. Must end in dnsName.
+          type: string
+          # TODO: Same as dnsName, find a better pattern. For now assert the
+          # trailing dot as that is the most common mistake.
+          pattern: \.$
+        type:
+          description: >
+            Type of the record.
+          type: string
+          enum:
+          - A
+          - AAAA
+          - SOA
+          - MX
+          - NS
+          - TXT
+        ttl:
+          description: >
+            The time-to-live cache seconds for this record.
+          type: integer
+          minimum: 0
+        rrdatas:
+          description: >
+            As defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1).
+          type: array
+          object:
+            type: string

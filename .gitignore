@@ -1,0 +1,33 @@
+.gradle
+/build/
+*.DS_Store
+.DS_Store
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+/out/
+.idea/
+build/**/*
+.gradle/**/*
+/out/
+src/main/java/com/csye6225/demo/ignore/*
+src/main/resources/application.properties
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
